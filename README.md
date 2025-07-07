@@ -6,6 +6,25 @@ rename its variables. Here is a simple example of what results it can provide in
 
 ![](https://github.com/JusticeRage/Gepetto/blob/main/readme/comparison.png?raw=true)
 
+## Enhancements in this Fork
+Made a few tweaks to make reverse engineering malware a bit easier:
+
+1. **Rename function (code context)**: Suggests a better function name based on how the code works. Great for general or clean functions.
+
+2. **Rename function (malware context**): Suggests a new name with a malware analysis lens. Useful when looking at suspicious or malicious functions.
+
+3. **Explain this malicious code**: Gives a plain-text explanation of what a function does (from a malware perspective). The output goes to the log window while no comments added to the code.
+
+### Screenshots
+Menu list:
+
+![image](https://github.com/user-attachments/assets/60fc142b-d7b2-472e-b000-388a35807e35)
+
+Example of output for the **Explain this malicious code**'s menu:
+
+![image](https://github.com/user-attachments/assets/971cbeec-4ce7-4110-a8b0-27df9bb0acf3)
+
+
 ## Setup
 
 Simply drop this script (`gepetto.py`, as well as the `gepetto/` folder) into your IDA plugins folder (`$IDAUSR/plugins`). 
@@ -131,10 +150,3 @@ localized version).
 - [HarfangLab](https://harfanglab.io/), the current backer making this work possible
 - [@vanhauser-thc](https://github.com/vanhauser-thc) for contributing ideas of additional models and providers to support via his [fork](https://github.com/vanhauser-thc/gepetto/)
 - Everyone who contributed translations: @seifreed, @kot-igor, @ruzgarkanar, @orangetw
-
-## New personal updates
-- Recommend and rename function
-- Explain the function code in malware behavior context, and print in the Output Log
-
-![image](https://github.com/user-attachments/assets/29c60d22-fd1f-428e-a643-703a7ecca381)
-
