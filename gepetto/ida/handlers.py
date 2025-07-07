@@ -284,7 +284,7 @@ def malware_behavior_callback(response, address, view, start_time):
     Print the explanation in IDA output window instead of adding a comment.
     """
     elapsed_time = time.time() - start_time
-    print("\n===== Malware Behavior Analysis =====")
+    print("\n===== Malicious Code Explaination =====")
     print(response.strip())
     print(f"===== End of Analysis (took {elapsed_time:.2f} seconds) =====\n")
 
@@ -303,8 +303,8 @@ class ExplainMalwareBehaviorHandler(idaapi.action_handler_t):
             print("Unable to access function or view.")
             return 0
 
-        prompt = _("In the context of malware behavior, can you analyze the following C function and explain what it does?\n\n"
-                   "Only return a plain-text explanation without any Markdown or code formatting.\n\n{decompiled}").format(decompiled=str(decompiled))
+        prompt = _("In the context of malware behavior, can you analyze the following C function and explain what it does? \n\n"
+                   "Only return a plain-text explanation without any Markdown or code formatting. Please include the summary of what the malicious code does in a paragraph. \n\n{decompiled}").format(decompiled=str(decompiled))
 
         gepetto.config.model.query_model_async(
             prompt,
