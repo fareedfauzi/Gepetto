@@ -193,7 +193,57 @@ class RenameFunctionHandler(idaapi.action_handler_t):
             return 0
 
         prompt = (
-            "Analyze the following C function:\n"
+            "Analyze the following C function code:\n"
+            f"{str(cfunc)}\n"
+            "Suggest a concise new name for this function. Only reply with the new function name, prefixed with 'fn_'."
+        )
+
+        def callback(response):
+            new_name = response.strip().split()[0]
+            func = idaapi.get_func(ea)
+            if not func:
+                print("Could not find function at address.")
+                return
+
+            old_name = idc.get_func_name(func.start_ea)
+            if new_name == old_name or not re.match(r'^fn_[A-Za-z_][A-Za-z0-9_]*$', new_name):
+                print(f"Invalid or unchanged name suggested: {new_name}")
+                return
+
+            success = idc.set_name(func.start_ea, new_name, idc.SN_AUTO)
+            if success:
+                print(f"Function renamed to: {new_name}")
+                if vdui:
+                    vdui.refresh_view(True)
+            else:
+                print(f"Failed to rename function to: {new_name}")
+
+        gepetto.config.model.query_model_async(
+            prompt,
+            callback,
+        )
+
+        print(_("Request to {model} sent...").format(model=str(gepetto.config.model)))
+        return 1
+
+    def update(self, ctx):
+        return idaapi.AST_ENABLE_ALWAYS
+        
+class RenameMalwareFunctionHandler(idaapi.action_handler_t):
+    def __init__(self):
+        super().__init__()
+
+    def activate(self, ctx):
+        ea = idaapi.get_screen_ea()
+        cfunc = ida_hexrays.decompile(ea)
+        vdui = ida_hexrays.get_widget_vdui(ctx.widget)
+
+        if not cfunc or not vdui:
+            print("Could not decompile the current function or get view.")
+            return 0
+
+        prompt = (
+            "Analyze the following C function code in the context of malware reverse engineering:\n"
             f"{str(cfunc)}\n"
             "Suggest a concise new name for this function. Only reply with the new function name, prefixed with 'fn_'."
         )
@@ -266,3 +316,4 @@ class ExplainMalwareBehaviorHandler(idaapi.action_handler_t):
 
     def update(self, ctx):
         return idaapi.AST_ENABLE_ALWAYS
+
