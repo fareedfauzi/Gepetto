@@ -15,6 +15,8 @@ from gepetto.ida.handlers import (
     GenerateCCodeHandler,
     GeneratePythonCodeHandler,
     RenameFunctionHandler,
+    ExplainMalwareBehaviorHandler,
+    RenameMalwareFunctionHandler,  # <- Added
 )
 from gepetto.ida.cli import register_cli
 import gepetto.models.model_manager
@@ -24,16 +26,22 @@ _ = gepetto.config._
 
 class GepettoPlugin(idaapi.plugin_t):
     flags = 0
+
     explain_action_name = "gepetto:explain_function"
-    explain_menu_path = "Edit/Gepetto/" + _("Explain function")
-    rename_action_name = "gepetto:rename_function"
-    rename_menu_path = "Edit/Gepetto/" + _("Rename variables")
+    rename_action_name = "gepetto:rename_variables"
+    rename_func_action_name = "gepetto:rename_function"
+    rename_func_malware_action_name = "gepetto:rename_function_malware"
+    explain_malware_action_name = "gepetto:explain_malware_behavior"
     c_code_action_name = "gepetto:generate_c_code"
-    c_code_menu_path = "Edit/Gepetto/" + _("Generate C Code")
     python_code_action_name = "gepetto:generate_python_code"
+
+    explain_menu_path = "Edit/Gepetto/" + _("Explain function")
+    rename_menu_path = "Edit/Gepetto/" + _("Rename variables")
+    rename_func_menu_path = "Edit/Gepetto/" + _("Rename function (code context)")
+    rename_func_malware_menu_path = "Edit/Gepetto/" + _("Rename function (malware context)")
+    explain_malware_menu_path = "Edit/Gepetto/" + _("Explain malware behavior")
+    c_code_menu_path = "Edit/Gepetto/" + _("Generate C Code")
     python_code_menu_path = "Edit/Gepetto/" + _("Generate Python Code")
-    rename_func_action_name = "gepetto:rename_function_fn"
-    rename_func_menu_path = "Edit/Gepetto/" + _("Rename function (fn_)")
 
     wanted_name = 'Gepetto'
     wanted_hotkey = ''
@@ -48,6 +56,7 @@ class GepettoPlugin(idaapi.plugin_t):
         if not gepetto.config.model:
             return idaapi.PLUGIN_SKIP
 
+        # Register actions
         idaapi.register_action(idaapi.action_desc_t(
             self.explain_action_name,
             _('Explain function'),
@@ -65,6 +74,30 @@ class GepettoPlugin(idaapi.plugin_t):
             19))
 
         idaapi.register_action(idaapi.action_desc_t(
+            self.rename_func_action_name,
+            _('Rename function (code context)'),
+            RenameFunctionHandler(),
+            "Ctrl+Alt+N",
+            _("Use {model} to rename this function with a 'fn_' prefix").format(model=str(gepetto.config.model)),
+            203))
+
+        idaapi.register_action(idaapi.action_desc_t(
+            self.rename_func_malware_action_name,
+            _('Rename function (malware context)'),
+            RenameMalwareFunctionHandler(),
+            "Ctrl+Alt+M",
+            _("Use {model} to rename this function with a 'fn_' prefix in malware context").format(model=str(gepetto.config.model)),
+            204))
+
+        idaapi.register_action(idaapi.action_desc_t(
+            self.explain_malware_action_name,
+            _('Explain malware behavior'),
+            ExplainMalwareBehaviorHandler(),
+            "Ctrl+Alt+B",
+            _("Explain the function in malware analysis context"),
+            453))
+
+        idaapi.register_action(idaapi.action_desc_t(
             self.c_code_action_name,
             _('Generate C Code'),
             GenerateCCodeHandler(),
@@ -80,19 +113,14 @@ class GepettoPlugin(idaapi.plugin_t):
             _("Generate python code from the currently selected function using {model}").format(model=str(gepetto.config.model)),
             201))
 
-        idaapi.register_action(idaapi.action_desc_t(
-            self.rename_func_action_name,
-            _('Rename function (fn_ prefix)'),
-            RenameFunctionHandler(),
-            "Ctrl+Alt+N",
-            _("Use {model} to rename this function with a 'fn_' prefix").format(model=str(gepetto.config.model)),
-            203))
-
+        # Attach to menu
         idaapi.attach_action_to_menu(self.explain_menu_path, self.explain_action_name, idaapi.SETMENU_APP)
         idaapi.attach_action_to_menu(self.rename_menu_path, self.rename_action_name, idaapi.SETMENU_APP)
+        idaapi.attach_action_to_menu(self.rename_func_menu_path, self.rename_func_action_name, idaapi.SETMENU_APP)
+        idaapi.attach_action_to_menu(self.rename_func_malware_menu_path, self.rename_func_malware_action_name, idaapi.SETMENU_APP)
+        idaapi.attach_action_to_menu(self.explain_malware_menu_path, self.explain_malware_action_name, idaapi.SETMENU_APP)
         idaapi.attach_action_to_menu(self.c_code_menu_path, self.c_code_action_name, idaapi.SETMENU_APP)
         idaapi.attach_action_to_menu(self.python_code_menu_path, self.python_code_action_name, idaapi.SETMENU_APP)
-        idaapi.attach_action_to_menu(self.rename_func_menu_path, self.rename_func_action_name, idaapi.SETMENU_APP)  # <- NEW
 
         self.generate_model_select_menu()
 
@@ -156,6 +184,8 @@ class ContextMenuHooks(idaapi.UI_Hooks):
         if idaapi.get_widget_type(form) == idaapi.BWN_PSEUDOCODE:
             idaapi.attach_action_to_popup(form, popup, GepettoPlugin.explain_action_name, "Gepetto/")
             idaapi.attach_action_to_popup(form, popup, GepettoPlugin.rename_action_name, "Gepetto/")
+            idaapi.attach_action_to_popup(form, popup, GepettoPlugin.rename_func_action_name, "Gepetto/")
+            idaapi.attach_action_to_popup(form, popup, GepettoPlugin.rename_func_malware_action_name, "Gepetto/")
+            idaapi.attach_action_to_popup(form, popup, GepettoPlugin.explain_malware_action_name, "Gepetto/")
             idaapi.attach_action_to_popup(form, popup, GepettoPlugin.c_code_action_name, "Gepetto/")
             idaapi.attach_action_to_popup(form, popup, GepettoPlugin.python_code_action_name, "Gepetto/")
-            idaapi.attach_action_to_popup(form, popup, GepettoPlugin.rename_func_action_name, "Gepetto/")
