@@ -11,7 +11,7 @@ Made a few tweaks to make reverse engineering malware a bit easier:
 
 1. **Rename function (code context)**: Suggests a better function name based on how the code works. Great for general or clean functions.
 
-2. : Suggests a new name with a malware analysis lens. Useful when looking at suspicious or malicious functions.
+2. **Rename function (malware context)**: Suggests a new name with a malware analysis lens. Useful when looking at suspicious or malicious functions.
 
 3. **Explain this malicious code**: Gives a plain-text explanation of what a function does (from a malware perspective). The output goes to the log window while no comments added to the code.
 
