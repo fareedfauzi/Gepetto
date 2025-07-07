@@ -303,8 +303,13 @@ class ExplainMalwareBehaviorHandler(idaapi.action_handler_t):
             print("Unable to access function or view.")
             return 0
 
-        prompt = _("In the context of malware behavior, can you analyze the following C function and explain what it does? \n\n"
-                   "Only return a plain-text explanation without any Markdown or code formatting. Please include the summary of what the malicious code does in a paragraph. \n\n{decompiled}").format(decompiled=str(decompiled))
+        prompt = _(
+                "Analyze the following C function in the context of malware behavior.\n\n"
+                "1. Provide a plain-text explanation in bullet or numbered points (no Markdown or code formatting).\n"
+                "2. After the points, include a brief summary paragraph describing what the malicious code is doing overall.\n\n"
+                "{decompiled}"
+                ).format(decompiled=str(decompiled))
+
 
         gepetto.config.model.query_model_async(
             prompt,
@@ -316,4 +321,3 @@ class ExplainMalwareBehaviorHandler(idaapi.action_handler_t):
 
     def update(self, ctx):
         return idaapi.AST_ENABLE_ALWAYS
-
