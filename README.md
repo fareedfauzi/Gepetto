@@ -131,3 +131,10 @@ localized version).
 - [HarfangLab](https://harfanglab.io/), the current backer making this work possible
 - [@vanhauser-thc](https://github.com/vanhauser-thc) for contributing ideas of additional models and providers to support via his [fork](https://github.com/vanhauser-thc/gepetto/)
 - Everyone who contributed translations: @seifreed, @kot-igor, @ruzgarkanar, @orangetw
+
+## New personal updates
+- Recommend and rename function
+- Explain the function code in malware behavior context, and print in the Output Log
+
+![image](https://github.com/user-attachments/assets/29c60d22-fd1f-428e-a643-703a7ecca381)
+
