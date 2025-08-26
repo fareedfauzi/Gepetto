@@ -59,22 +59,25 @@ class LMStudio(GPT):
             ) if proxy else None
         )
 
-    def query_model(self, query, cb, additional_model_options=None):
-        if additional_model_options is not None and additional_model_options.get("response_format", {}).get("type") == "json_object":
-            additional_model_options.update({
-                "response_format": {
-                    "type": "json_schema",
-                    "json_schema": {
-                        "schema": {
-                            "type": "object"
+    def query_model(self, query, cb, stream=False, additional_model_options=None):
+        # normalize options
+        opts = {}
+        if isinstance(additional_model_options, dict):
+            if additional_model_options.get("response_format", {}).get("type") == "json_object":
+                opts = {
+                    "response_format": {
+                        "type": "json_schema",
+                        "json_schema": {
+                            "schema": {"type": "object"}
                         }
                     }
                 }
-            })
-        else:
-            additional_model_options = {}
+            else:
+                opts = additional_model_options
 
-        super().query_model(query, cb, additional_model_options)
+        # delegate to GPT.query_model with all arguments
+        return super().query_model(query, cb, stream, opts)
+
 
     # -----------------------------------------------------------------------------
 
